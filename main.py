@@ -1,10 +1,12 @@
 import time
 import logging
 import httpx
+from rich.console import Console
 from string import Template
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
 import pyperclip
+console = Console()
 
 # Initialize controller for keyboard actions
 controller = Controller()
@@ -15,29 +17,32 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # OLLAMA API configuration
 OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
 OLLAMA_CONFIG = {
-    "model": "mistral:7b-instruct-v0.2-q4_K_S",
+    #"model": "mistral:7b-instruct-v0.2-q4_K_S",
+    "model": "phi3",
     "keep_alive": "15m",
     "stream": False,
 }
 
 # Templates for generating prompts to send to the OLLAMA API
 CORRECT_TEXT_TEMPLATE = Template("""
-    Please correct all typos, adjust casing, and fix punctuation errors in the following text. Preserve the format, especially new line characters. 
+    Correct all typos, adjust casing, and fix punctuation in the text below. Preserve original formatting, including line breaks.
     
     Original text:
     $text
     
-    Note: Return only the corrected text. Exclude any additional comments or preamble.
+    Return only the corrected text, omitting any additional comments or explanations.
 """)
 
+
 IMPROVE_TEXT_TEMPLATE = Template("""
-    Suggest improvements to enhance clarity, engagement, or style without changing the core message of the following text. Preserve the format, especially new line characters.
-    
+    The objective of this task is to meticulously review the text provided below and suggest modifications that will significantly enhance its overall clarity, increase the level of engagement, and refine its stylistic presentation, while meticulously ensuring that the core message and intent of the text remain untouched. It is imperative to pay close attention to maintaining the original formatting elements, particularly the line breaks, which are crucial for the text’s structure.
+
     Original text:
     $text
-    
-    Note: Return only the improved text. Exclude any additional comments or preamble.
+
+    Kindly ensure that your submission includes solely the text that has been improved. Exclude any form of commentary, additional notes, or preamble that does not directly contribute to the revised version of the text.
 """)
+
 
 def suggest_improvements(text):
     """Sends text for stylistic improvements."""
@@ -93,7 +98,7 @@ def fix_selection():
     if not fixed_text:
         return
 
-    logging.info(f"Fixed text response: {fixed_text}")
+    console.print(f"Fixed text response: {fixed_text}")
     pyperclip.copy(fixed_text)
     time.sleep(0.1)  # Allow time for clipboard to update
 

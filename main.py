@@ -6,6 +6,8 @@ from string import Template
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
 import pyperclip
+import time
+
 console = Console()
 
 # Initialize controller for keyboard actions
@@ -18,7 +20,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
 OLLAMA_CONFIG = {
     #"model": "mistral:7b-instruct-v0.2-q4_K_S",
-    "model": "phi3",
+    "model": "llama3-gradient",
     "keep_alive": "15m",
     "stream": False,
 }
@@ -47,6 +49,7 @@ IMPROVE_TEXT_TEMPLATE = Template("""
 def suggest_improvements(text):
     """Sends text for stylistic improvements."""
     prompt = IMPROVE_TEXT_TEMPLATE.substitute(text=text)
+    console.log("Sending data to API...", style="bold magenta")
     response = httpx.post(
         OLLAMA_ENDPOINT,
         json={"prompt": prompt, **OLLAMA_CONFIG},
@@ -56,10 +59,12 @@ def suggest_improvements(text):
     if response.status_code != 200:
         logging.error("Error %s", response.status_code)
         return None
+    console.log("Data received. Processing...", style="bold green")
     return response.json()["response"].strip()
 
 def fix_text(text):
     """Corrects typos and grammatical errors in text."""
+    console.log("Sending data to API...", style="bold magenta")
     prompt = CORRECT_TEXT_TEMPLATE.substitute(text=text)
     response = httpx.post(
         OLLAMA_ENDPOINT,
@@ -70,6 +75,7 @@ def fix_text(text):
     if response.status_code != 200:
         logging.error("Error %s", response.status_code)
         return None
+    console.log("Data received. Processing...", style="bold green")
     return response.json()["response"].strip()
 
 def fix_current_line():
@@ -98,7 +104,7 @@ def fix_selection():
     if not fixed_text:
         return
 
-    console.print(f"Fixed text response: {fixed_text}")
+    console.print(f"[cyan]Fixed text response: {fixed_text}.")
     pyperclip.copy(fixed_text)
     time.sleep(0.1)  # Allow time for clipboard to update
 
@@ -120,7 +126,7 @@ def fix_selection_with_improvements():
     improved_text = suggest_improvements(text)
     if not improved_text:
         return
-
+    console.print(f"[cyan]Fixed text response: {improved_text}.")
     pyperclip.copy(improved_text)
     time.sleep(0.1)  # Allow time for clipboard to update
 

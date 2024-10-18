@@ -8,6 +8,8 @@ from pynput.keyboard import Key, Controller
 import pyperclip
 import time
 
+from templates import CORRECT_TEXT_TEMPLATE, IMPROVE_TEXT_TEMPLATE, CORRECT_TEXT_V2_TEMPLATE 
+
 console = Console()
 
 # Initialize controller for keyboard actions
@@ -20,35 +22,19 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
 OLLAMA_CONFIG = {
     #"model": "mistral:7b-instruct-v0.2-q4_K_S",
-    "model": "llama3-gradient",
+    "model": "llama3.2",
     "keep_alive": "15m",
     "stream": False,
+    "options":{
+        "temperature": 0.5,
+    },
 }
 
-# Templates for generating prompts to send to the OLLAMA API
-CORRECT_TEXT_TEMPLATE = Template("""
-    Correct all typos, adjust casing, and fix punctuation in the text below. Preserve original formatting, including line breaks.
-    
-    Original text:
-    $text
-    
-    Return only the corrected text, omitting any additional comments or explanations.
-""")
-
-
-IMPROVE_TEXT_TEMPLATE = Template("""
-    The objective of this task is to meticulously review the text provided below and suggest modifications that will significantly enhance its overall clarity, increase the level of engagement, and refine its stylistic presentation, while meticulously ensuring that the core message and intent of the text remain untouched. It is imperative to pay close attention to maintaining the original formatting elements, particularly the line breaks, which are crucial for the text’s structure.
-
-    Original text:
-    $text
-
-    Kindly ensure that your submission includes solely the text that has been improved. Exclude any form of commentary, additional notes, or preamble that does not directly contribute to the revised version of the text.
-""")
 
 
 def suggest_improvements(text):
     """Sends text for stylistic improvements."""
-    prompt = IMPROVE_TEXT_TEMPLATE.substitute(text=text)
+    prompt = CORRECT_TEXT_V2_TEMPLATE.substitute(text=text)
     console.log("Sending data to API...", style="bold magenta")
     response = httpx.post(
         OLLAMA_ENDPOINT,
@@ -65,7 +51,7 @@ def suggest_improvements(text):
 def fix_text(text):
     """Corrects typos and grammatical errors in text."""
     console.log("Sending data to API...", style="bold magenta")
-    prompt = CORRECT_TEXT_TEMPLATE.substitute(text=text)
+    prompt = IMPROVE_TEXT_TEMPLATE.substitute(text=text)
     response = httpx.post(
         OLLAMA_ENDPOINT,
         json={"prompt": prompt, **OLLAMA_CONFIG},

@@ -46,11 +46,15 @@ Execute the script to start the assistant:
 python main.py
 ```
 
+Or execute your script with the following command:
+```bash
+./run_app.sh
+```
+
 ### Hotkeys
 
 - **F9**: Corrects the current line of text.
 - **F10**: Corrects the currently selected text.
-- **cmd + ctrl + s**: Suggest ways to improve the selected text, and also correct any errors in spelling, grammar, and punctuation.
 
 ### Troubleshooting
 

@@ -1,12 +1,11 @@
-# templates.py
 from string import Template
 
 CORRECT_TEXT_TEMPLATE = Template("""
-Correct all typographical errors, adjust capitalization, and fix punctuation in the following text. Ensure to preserve the original formatting, including line breaks.
-Please return only the corrected text without any additional comments or explanations.
+Correct all typos, adjust capitalization, and fix punctuation and grammar in the following text. Preserve the original formatting, including line breaks.
 Original text:
 $text
 
+Return only the corrected text without any comments or explanations.                               
 """)
 
 CORRECT_TEXT_V2_TEMPLATE = Template("""
@@ -59,10 +58,32 @@ If no input text is provided, respond with: "No input text provided. Please subm
 """)
 
 IMPROVE_TEXT_TEMPLATE = Template("""
-Please rewrite the following text to improve its clarity and make it sound more natural and conversational, while preserving its original tone, meaning, and overall length. The revised version should stay close to the original wording, without adding new information or changing the intent.
-                                                                                          
+Please rewrite the following text to improve clarity and make it more conversational while preserving all key words and expressions. The revised text should maintain the original meaning, tone, and length. Do not remove or change emphasis words.                                                                                        
 Original text:
 $text
 
 Submit only the improved text, ensuring it remains similar in length to the original, without any commentary, notes, or preamble.
+""")
+
+
+SYSTEM_PROMPT_TEMPLATE = Template("""
+Guidelines for Effective Responses
+
+Clarity and Simplicity
+- Ensure responses are accurate, respectful, and easy to understand.
+- Use active voice and simple language to make statements direct and clear.
+- Avoid jargon unless necessary; explain technical terms when helpful.
+
+Engagement and Understanding
+- Craft engaging responses to maintain the user's interest.
+- Simplify complex ideas or code to promote understanding.
+- Use analogies or metaphors when they help clarify the message.
+
+Contextual Understanding
+- Adapt explanations based on the user's level of expertise.
+- Provide information that is directly relevant to the user's query.
+
+Tone and Adaptability
+- Use natural, friendly language for a conversational tone.
+- Adjust the tone based on context (e.g., more formal for professional communications).
 """)

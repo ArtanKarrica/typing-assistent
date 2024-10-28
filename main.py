@@ -8,7 +8,7 @@ from pynput.keyboard import Key, Controller
 import pyperclip
 import time
 
-from templates import CORRECT_TEXT_TEMPLATE, IMPROVE_TEXT_TEMPLATE, CORRECT_TEXT_V2_TEMPLATE 
+from templates import CORRECT_TEXT_TEMPLATE, SYSTEM_PROMPT_TEMPLATE, IMPROVE_TEXT_TEMPLATE, CORRECT_TEXT_V2_TEMPLATE 
 
 console = Console()
 
@@ -21,12 +21,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # OLLAMA API configuration
 OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
 OLLAMA_CONFIG = {
-    #"model": "mistral:7b-instruct-v0.2-q4_K_S",
+    #"model": "aya-expanse",
     "model": "llama3.2",
     "keep_alive": "15m",
     "stream": False,
     "options":{
         "temperature": 0.5,
+        "system": SYSTEM_PROMPT_TEMPLATE.substitute(),
     },
 }
 
@@ -51,7 +52,7 @@ def suggest_improvements(text):
 def fix_text(text):
     """Corrects typos and grammatical errors in text."""
     console.log("Sending data to API...", style="bold magenta")
-    prompt = IMPROVE_TEXT_TEMPLATE.substitute(text=text)
+    prompt = CORRECT_TEXT_TEMPLATE.substitute(text=text)
     response = httpx.post(
         OLLAMA_ENDPOINT,
         json={"prompt": prompt, **OLLAMA_CONFIG},

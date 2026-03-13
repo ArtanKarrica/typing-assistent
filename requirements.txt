@@ -1,3 +1,4 @@
 httpx
 pynput
 pyperclip
+rich

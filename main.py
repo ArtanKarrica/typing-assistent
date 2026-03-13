@@ -189,11 +189,26 @@ def remove_non_printable_selection():
     with controller.pressed(Key.cmd):
         controller.tap('v')
 
-# Setup global hotkeys
-with keyboard.GlobalHotKeys({
-    "<101>": on_f9,                    # F9 → fix_current_line
-    "<109>": on_f10,                   # F10 → fix_selection
-    '<cmd>+<ctrl>+s': on_cmd_ctrl_s,   # Cmd+Ctrl+S → improve selection
-    "<media_previous>": remove_non_printable_selection,  # F7 → strip non-printables
-}) as hotkeys:
-    hotkeys.join()
+def quit_app():
+    """Stops the application listener."""
+    console.print("[bold yellow]Stopping Typing Assistant...[/bold yellow]")
+    return False
+
+
+def main():
+    """Starts the global hotkey listener."""
+    console.print("[bold green]Typing Assistant is running.[/bold green]")
+    console.print("Hotkeys: F9 fix line, F10 fix selection, Cmd+Ctrl+S improve, Cmd+Ctrl+Q quit.")
+
+    with keyboard.GlobalHotKeys({
+        "<101>": on_f9,                    # F9 → fix_current_line
+        "<109>": on_f10,                   # F10 → fix_selection
+        '<cmd>+<ctrl>+s': on_cmd_ctrl_s,   # Cmd+Ctrl+S → improve selection
+        '<cmd>+<ctrl>+q': quit_app,        # Cmd+Ctrl+Q → quit app
+        "<media_previous>": remove_non_printable_selection,  # F7 → strip non-printables
+    }) as hotkeys:
+        hotkeys.join()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,132 +1,98 @@
 from string import Template
 
-CORRECT_TEXT_TEMPLATE = Template("""
-Correct all typos, adjust capitalization, and fix punctuation and grammar in the following text. Preserve the original formatting, including line breaks.
+CORRECT_TEXT_TEMPLATE_Old = Template("""
+Correct all typos, and fix punctuation and grammar in the following text. Preserve the original formatting, including line breaks.
 Original text:
+<text>
 $text
+</text>
 
 Return only the corrected text without any comments or explanations.                               
 """)
 
+CORRECT_TEXT_TEMPLATE = Template("""
+Correct the text below by fixing only:
+- spelling
+- grammar
+- punctuation
+- capitalization
+- obvious word-choice mistakes
+
+Preserve:
+- the original meaning
+- the original language
+- the original tone
+- line breaks and spacing
+- names, technical terms, and emphasis
+
+Make only the minimum necessary changes.
+Do not rewrite for style unless needed for clarity.
+Do not add new information.
+Do not include commentary, reasoning, labels, or quotation marks.
+Return only the corrected text.
+
+Original text:
+<text>
+$text
+</text>
+""")
+
+
 CORRECT_TEXT_V2_TEMPLATE = Template("""
-### Text Refinement Assistant
+Rewrite the text below to improve clarity, flow, and readability.
 
-**Objective**: Enhance text clarity, coherence, and style while preserving the original meaning and tone. Adjust the approach for different text lengths, contexts, and intended audiences.
+Preserve:
+- the original meaning
+- the original language
+- the original tone and intent
+- important names, terms, and emphasis
+- roughly the same length
 
-#### Text Classification
-- **Short Text**: Conversational messages, brief comments, informal communications.
-- **Long Text**: Emails, paragraphs, formal documents, reports, articles.
+Adjust the wording only as much as needed to make the text sound polished and natural.
+For short informal text, keep it conversational.
+For longer text, improve structure and coherence without becoming verbose.
 
-#### Text Refinement
-- **Short Text**:
-  - Maintain a casual tone with informal language where appropriate.
-  - Use contractions for a natural, conversational style.
-  - Keep sentences concise and impactful.
-  - Retain the original voice and personality of the author.
-  - Keep the word count similar to the original.
-- **Long Text**:
-  - Adjust formality based on the context and intended audience.
-  - Improve structure by ensuring a clear introduction, body, and conclusion.
-  - Break long paragraphs into shorter, more digestible segments.
-  - Use bullet points or numbered lists to improve readability and clarity.
-  - Ensure logical flow and coherence between sections.
+Do not add new information.
+Do not answer questions contained in the text.
+Do not include commentary, reasoning, labels, bullet points, or quotation marks.
+Return only the rewritten text.
 
-#### General Guidelines
-- Correct grammar, spelling, and punctuation.
-- Improve clarity, readability, and consistency.
-- Use active voice to enhance engagement and clarity.
-- Simplify complex words where possible, without sacrificing meaning.
-- Tailor language complexity based on the intended audience and context.
-- Remove redundant words or phrases to streamline the text.
-
-#### Key Elements to Retain
-- Preserve the core message, intent, and key formatting elements (e.g., line breaks, emphasis).
-- Retain technical terms or jargon as needed, depending on the audience's familiarity.
-- Maintain any stylistic choices that contribute to the original tone or voice.
-
-#### Output Guidelines
-- Provide the refined text only, without additional commentary.
-- Maintain the original language and tone of the input.
-- For questions, clarify the phrasing but do not provide answers.
-- Ensure the output is polished and ready for its intended use.
-
-#### Length Considerations
-- **Short Text**: Keep the refined version close to the original word count.
-- **Long Text**: Stay within 10% of the original word count, unless otherwise specified.
-
-If no input text is provided, respond with: "No input text provided. Please submit text for refinement."
+Original text:
+<text>
+$text
+</text>
 """)
 
 IMPROVE_TEXT_TEMPLATE = Template("""
-Please rewrite the following text to improve clarity and make it more conversational while preserving all key words and expressions. The revised text should maintain the original meaning, tone, and length. Do not remove or change emphasis words.                                                                                        
+Rewrite the text below to improve clarity and flow while preserving:
+- the original meaning
+- the original language
+- the original tone
+- important names, terms, and emphasis
+- roughly the same length
+
+Make it sound natural and conversational when appropriate, but do not make it casual if the original text is formal.
+Do not add new information.
+Do not answer questions in the text.
+Do not include commentary, reasoning, labels, or quotation marks.
+Return only the rewritten text.
+
 Original text:
+<text>
 $text
-
-Submit only the improved text, ensuring it remains similar in length to the original, without any commentary, notes, or preamble.
+</text>
 """)
 
-
-SYSTEM_PROMPT_TEMPLATE_old = Template("""
-Guidelines for Effective Responses
-
-Clarity and Simplicity
-- Ensure responses are accurate, respectful, and easy to understand.
-- Use active voice and simple language to make statements direct and clear.
-- Avoid jargon unless necessary; explain technical terms when helpful.
-
-Engagement and Understanding
-- Craft engaging responses to maintain the user's interest.
-- Simplify complex ideas or code to promote understanding.
-- Use analogies or metaphors when they help clarify the message.
-
-Contextual Understanding
-- Adapt explanations based on the user's level of expertise.
-- Provide information that is directly relevant to the user's query.
-
-Tone and Adaptability
-- Use natural, friendly language for a conversational tone.
-- Adjust the tone based on context (e.g., more formal for professional communications).
-""")
 
 SYSTEM_PROMPT_TEMPLATE = Template("""
-Guidelines for Rewriting Messages
+You are a text editor.
 
-Purpose: Rewrite messages (emails, text conversations) to improve clarity, tone, and readability while preserving the original intent.
+Your job is to improve or correct user-provided text while preserving its meaning, language, tone, and formatting unless the user explicitly asks otherwise.
 
-1. Simplicity and Clarity
-   - Use simple language to convey complex ideas.
-   - Avoid technical jargon unless necessary; provide brief explanations if used.
-   - Eliminate unnecessary or repetitive words.
-
-2. Contextual Understanding
-   - Tailor the message to the audience's expertise level.
-   - Include information directly relevant to the query.
-
-3. Style, Tone, and Customization
-   - Adapt style and tone based on the original text or specified preferences.
-   - Default to a professional and friendly tone if no preference is given.
-   - Ensure tone consistency throughout the message.
-
-4. Accuracy
-   - Convey the original message's intent accurately.
-
-5. Readability
-   - Prioritize clear structure and organization.
-   - Use paragraphs to organize ideas.
-   - Aim for readability appropriate for the audience (e.g., Grade 8 level).
-
-6. Error Handling
-   - Correct typos and grammatical errors without changing the intended meaning.
-   - Clarify ambiguities while maintaining intent.
-
-7. Format-Specific Guidelines
-   - **Emails:** Use proper greeting, body, and closing. Maintain appropriate tone.
-   - **Messages:** Keep language concise for quick reading.
-
-8. Audience Awareness
-   - Consider the audience's knowledge level.
-   - Use clear and accessible language if uncertain.
-
-9. Verification
-   - Review the rewritten text to ensure guidelines are met and intent is preserved.
+Rules:
+- Follow the user task exactly.
+- Preserve names, numbers, technical terms, and emphasized words.
+- Do not add new facts or remove important details.
+- Do not include explanations, reasoning, notes, labels, or preambles.
+- Return only the final edited text.
 """)

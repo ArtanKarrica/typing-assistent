@@ -1,14 +1,13 @@
-import time
+import os
 import logging
-import httpx
-from rich.console import Console
-from string import Template
-from pynput import keyboard
-from pynput.keyboard import Key, Controller
-import pyperclip
 import time
+import httpx
+import pyperclip
+from pynput import keyboard
+from pynput.keyboard import Controller, Key
+from rich.console import Console
 
-from templates import CORRECT_TEXT_TEMPLATE, SYSTEM_PROMPT_TEMPLATE, IMPROVE_TEXT_TEMPLATE, CORRECT_TEXT_V2_TEMPLATE 
+from templates import CORRECT_TEXT_TEMPLATE, CORRECT_TEXT_V2_TEMPLATE, SYSTEM_PROMPT_TEMPLATE
 
 console = Console()
 
@@ -19,51 +18,83 @@ controller = Controller()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # OLLAMA API configuration
-OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
+# Use IPv4 loopback by default to avoid localhost resolving to ::1 on macOS.
+OLLAMA_ENDPOINT = os.getenv("OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/generate")
 OLLAMA_CONFIG = {
-    #"model": "aya-expanse",
-    "model": "llama3.2",
+    "model": "qwen3.5:0.8b",
+    #"model": "deepseek-r1:8b",
     "keep_alive": "15m",
+    "think": False,
     "stream": False,
+    "system": SYSTEM_PROMPT_TEMPLATE.substitute(),
     "options":{
         "temperature": 0.5,
-        "system": SYSTEM_PROMPT_TEMPLATE.substitute(),
     },
 }
 
+
+def send_prompt(prompt, timeout):
+    """Sends a prompt to Ollama and returns the response text."""
+    console.log("Sending data to API...", style="bold magenta")
+
+    try:
+        response = httpx.post(
+            OLLAMA_ENDPOINT,
+            json={"prompt": prompt, **OLLAMA_CONFIG},
+            headers={"Content-Type": "application/json"},
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        result = payload.get("response", "").strip()
+    except httpx.ConnectError:
+        logging.error(
+            "Could not connect to Ollama at %s. Start Ollama with 'ollama serve' and ensure the model is available.",
+            OLLAMA_ENDPOINT,
+        )
+        console.print(
+            f"[bold red]Ollama is not reachable at {OLLAMA_ENDPOINT}.[/bold red] "
+            "Start it with [cyan]ollama serve[/cyan]."
+        )
+        return None
+    except httpx.ReadTimeout:
+        logging.error(
+            "Ollama timed out after %ss at %s. The model may still be loading or generating.",
+            timeout,
+            OLLAMA_ENDPOINT,
+        )
+        console.print(
+            f"[bold red]Ollama timed out after {timeout}s.[/bold red] "
+            "If this is the first request, let the model load once or increase the timeout."
+        )
+        return None
+    except httpx.HTTPStatusError as exc:
+        logging.error("Ollama returned HTTP %s: %s", exc.response.status_code, exc.response.text)
+        console.print(f"[bold red]Ollama returned HTTP {exc.response.status_code}.[/bold red]")
+        return None
+    except (httpx.HTTPError, ValueError) as exc:
+        logging.error("Unexpected Ollama error: %s", exc)
+        console.print("[bold red]Failed to process the Ollama response.[/bold red]")
+        return None
+
+    if not result:
+        logging.error("Ollama response did not include any text: %s", payload)
+        console.print("[bold red]Ollama returned an empty response.[/bold red]")
+        return None
+
+    console.log("Data received. Processing...", style="bold green")
+    return result
 
 
 def suggest_improvements(text):
     """Sends text for stylistic improvements."""
     prompt = CORRECT_TEXT_V2_TEMPLATE.substitute(text=text)
-    console.log("Sending data to API...", style="bold magenta")
-    response = httpx.post(
-        OLLAMA_ENDPOINT,
-        json={"prompt": prompt, **OLLAMA_CONFIG},
-        headers={"Content-Type": "application/json"},
-        timeout=60,
-    )
-    if response.status_code != 200:
-        logging.error("Error %s", response.status_code)
-        return None
-    console.log("Data received. Processing...", style="bold green")
-    return response.json()["response"].strip()
+    return send_prompt(prompt, timeout=120)
 
 def fix_text(text):
     """Corrects typos and grammatical errors in text."""
-    console.log("Sending data to API...", style="bold magenta")
     prompt = CORRECT_TEXT_TEMPLATE.substitute(text=text)
-    response = httpx.post(
-        OLLAMA_ENDPOINT,
-        json={"prompt": prompt, **OLLAMA_CONFIG},
-        headers={"Content-Type": "application/json"},
-        timeout=30,
-    )
-    if response.status_code != 200:
-        logging.error("Error %s", response.status_code)
-        return None
-    console.log("Data received. Processing...", style="bold green")
-    return response.json()["response"].strip()
+    return send_prompt(prompt, timeout=90)
 
 def fix_current_line():
     """Selects and fixes the current line."""
@@ -133,10 +164,36 @@ def on_cmd_ctrl_s():
     """Handler for Cmd+Ctrl+S key combination."""
     fix_selection_with_improvements()
 
+def remove_non_printable_selection():
+    """Removes non-printable chars from the current selection."""
+    # Copy current selection
+    with controller.pressed(Key.cmd):
+        controller.tap('c')
+    time.sleep(0.1)
+
+    text = pyperclip.paste()
+    if not text:
+        return
+
+    # Filter out everything except tab, LF, CR, and printable ASCII
+    cleaned = ''.join(
+        ch for ch in text
+        if 32 <= ord(ch) <= 126 or ch in ('\t', '\n', '\r')
+    )
+
+    console.log("Non-printables removed.", style="bold yellow")
+    pyperclip.copy(cleaned)
+    time.sleep(0.1)
+
+    # Paste the cleaned text back
+    with controller.pressed(Key.cmd):
+        controller.tap('v')
+
 # Setup global hotkeys
 with keyboard.GlobalHotKeys({
-    "<101>": on_f9,
-    "<109>": on_f10,
-    '<cmd>+<ctrl>+s': on_cmd_ctrl_s
+    "<101>": on_f9,                    # F9 → fix_current_line
+    "<109>": on_f10,                   # F10 → fix_selection
+    '<cmd>+<ctrl>+s': on_cmd_ctrl_s,   # Cmd+Ctrl+S → improve selection
+    "<media_previous>": remove_non_printable_selection,  # F7 → strip non-printables
 }) as hotkeys:
     hotkeys.join()

@@ -1,70 +1,58 @@
-# Text Correction Assistant
+# Typing Assistant
 
-## Overview
+Typing Assistant is a macOS keyboard helper that sends selected text to Ollama, fixes mistakes, and pastes the edited text back into the active app.
 
-The Text Correction Assistant is a powerful tool designed to enhance your productivity by automatically correcting typographical errors, adjusting casing, and fixing punctuation in your text. Utilizing the advanced capabilities of the Ollama AI model server, this assistant provides real-time text correction through easy-to-use hotkeys.
+## What It Does
 
-## Getting Started
+- Fixes typos, grammar, punctuation, and capitalization
+- Improves selected text while keeping the original meaning and tone
+- Cleans non-printable characters from the current selection
+- Works through global hotkeys
 
-### Prerequisites
+## Requirements
 
-- Python 3.6 or later.
-- Access to a command-line interface.
-- Ollama AI Model Server for text processing.
+- macOS
+- Python 3.11 or newer
+- [Ollama](https://ollama.com/)
+- Accessibility and Input Monitoring permissions for the terminal or app that runs the script
 
-### Step 1: Install Ollama
+## Quick Start
 
-1. **Ollama Installation**: Follow the Ollama installation guide on the [official Ollama GitHub repository](https://github.com/ollama/ollama).
-2. **Run Ollama with Mistral Model**:
+1. Start Ollama:
+
    ```bash
-   ollama run mistral:7b-instruct-v0.2-q4_K_S
-   ```
-   Note: Mistral 7B Instruct is recommended for its proficiency in text corrections. However, you're encouraged to experiment with other models.
-
-### Step 2: Set Up Your Environment
-
-1. **Clone the Project Repository** (replace `YourProjectURL` with the actual URL of your project):
-   ```bash
-   git clone YourProjectURL
-   cd YourProjectDirectoryName
-   ```
-2. **Create and Activate a Python Virtual Environment**:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-3. **Install Required Dependencies**:
-   ```bash
-   pip install -r requirements.txt
+   ./start_ollama.sh
    ```
 
-### Step 3: Run the Assistant
+2. Start the Typing Assistant in a second terminal:
 
-Execute the script to start the assistant:
+   ```bash
+   ./run_app.sh
+   ```
 
-```bash
-python main.py
-```
+3. Use the hotkeys in any app.
 
-Or execute your script with the following command:
-```bash
-./run_app.sh
-```
+## Hotkeys
 
-### Hotkeys
+- `F9`: Fix the current line
+- `F10`: Fix the selected text
+- `Cmd+Ctrl+S`: Improve the selected text
+- `F7` / `media_previous`: Remove non-printable characters from the selected text
+- `Cmd+Ctrl+Q`: Quit the Typing Assistant
 
-- **F9**: Corrects the current line of text.
-- **F10**: Corrects the currently selected text.
+## Stop the App
 
-### Troubleshooting
+- Press `Cmd+Ctrl+Q` while the assistant is running
+- Or press `Ctrl+C` in the terminal where `./run_app.sh` is running
 
-- **Accessibility Permissions**: On macOS, you might encounter an error regarding accessibility permissions. Ensure that your script (or the IDE/terminal running it) is granted the necessary permissions in the system settings under Security & Privacy > Accessibility and Input Monitoring.
-- **Key Bindings**: The default key bindings are set for macOS (using `Cmd` key). For Windows or Linux, you may need to modify the script to use the `Ctrl` key instead of `Cmd`.
+## Notes
 
-## Customization
+- `./run_app.sh` creates the `venv` folder the first time and installs dependencies if needed.
+- `./start_ollama.sh` starts the Ollama API server if it is not already running and pulls the configured model.
+- The default model is `qwen3.5:0.8b`. You can change it in `main.py` or by setting `OLLAMA_MODEL` before running `./start_ollama.sh`.
 
-You can customize the hotkeys, prompt templates, and Ollama configuration within the code to suit your preferences or specific tasks. Example prompt templates are provided in the script for easy adjustments.
+## Troubleshooting
 
----
-
-Replace `YourProjectURL` and `YourProjectDirectoryName` with your project's actual repository URL and directory name, respectively. This README provides a comprehensive guide for users to set up and start using the Text Correction Assistant.
+- If requests time out, wait for the model to finish loading and try again.
+- If hotkeys do not work, grant Accessibility and Input Monitoring permissions in macOS settings.
+- If Ollama is not reachable, verify the API is available at `http://127.0.0.1:11434`.

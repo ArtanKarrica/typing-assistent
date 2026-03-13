@@ -27,6 +27,8 @@ Preserve:
 
 Make only the minimum necessary changes.
 Do not rewrite for style unless needed for clarity.
+If a sentence is correct but sounds awkward or unnatural, make the smallest change needed to make it sound natural and clear.
+Prefer fluent, idiomatic phrasing over robotic or overly literal wording.
 Do not add new information.
 Do not include commentary, reasoning, labels, or quotation marks.
 Return only the corrected text.
@@ -51,6 +53,9 @@ Preserve:
 Adjust the wording only as much as needed to make the text sound polished and natural.
 For short informal text, keep it conversational.
 For longer text, improve structure and coherence without becoming verbose.
+Ensure each sentence is clear, natural, and idiomatic.
+Rewrite awkward phrasing so it sounds like something a native speaker would naturally say.
+Prefer smooth, human-sounding wording over robotic or overly literal phrasing.
 
 Do not add new information.
 Do not answer questions contained in the text.
@@ -72,6 +77,9 @@ Rewrite the text below to improve clarity and flow while preserving:
 - roughly the same length
 
 Make it sound natural and conversational when appropriate, but do not make it casual if the original text is formal.
+Ensure each sentence is clear, natural, and idiomatic.
+Rewrite awkward phrasing so it sounds like something a native speaker would naturally say.
+Prefer smooth, human-sounding wording over robotic or overly literal phrasing.
 Do not add new information.
 Do not answer questions in the text.
 Do not include commentary, reasoning, labels, or quotation marks.
@@ -93,6 +101,7 @@ Rules:
 - Follow the user task exactly.
 - Preserve names, numbers, technical terms, and emphasized words.
 - Do not add new facts or remove important details.
+- Prefer natural, fluent phrasing over robotic or overly literal wording.
 - Do not include explanations, reasoning, notes, labels, or preambles.
 - Return only the final edited text.
 """)

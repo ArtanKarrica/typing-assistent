@@ -1,12 +1,7 @@
 #!/bin/bash
 
-# Example of setting the PATH environment variable
-export PATH="/usr/local/bin:$PATH"
+set -euo pipefail
 
-# Activate your Python virtual environment
-source /Users/artankarrica/Desktop/Python/typing-assistent/venv/bin/activate
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-
-# Run your Python script
-python3 /Users/artankarrica/Desktop/Python/typing-assistent/main.py
-
+"$SCRIPT_DIR/run_app.sh"
